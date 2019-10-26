@@ -2,7 +2,7 @@ import math
 
 #EPSILON = "ɛ"
 #OMEGA = "ω"
-EPSILON = "{\\epsilon}"
+EPSILON = "{\\varepsilon}"
 OMEGA = "{\\omega}"
 
 def longest_common_prefix(words):
