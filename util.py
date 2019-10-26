@@ -1,12 +1,42 @@
 import math
 
+def longest_common_prefix(words):
+    some_str = None
+    some_peri_word = None
+    for w in words:
+        if isinstance(w, str):
+            some_str = w
+        elif isinstance(w, PeriodicWord):
+            some_peri_word = w
+        if some_str is not None and some_peri_word is not None:
+            break
+    if some_str:
+        for i in range(len(some_str), -1 , -1):
+            prefix = some_str[:i]
+            if all(map(lambda s: s.startswith(prefix), words)):
+                return prefix
+        return ""
+    else:
+        if all(w == some_peri_word for w in words):
+            return some_peri_word
+        longest_prefix = ""
+        i = 0
+        while True:
+            prefix = some_peri_word.expand(i)
+            if not all([w.startswith(prefix) for w in words]):
+                break
+            else:
+                longest_prefix = prefix
+                i += 1
+        return longest_prefix
+
 def rrotate(s, n):
     n = n % len(s)
     return s[-n:] + s[:-n]
 
 def minimize_period(period):
     # very inefficient, but I don't care
-    for i in range(2, len(period)):
+    for i in range(1, len(period)):
         prefix = period[:i]
         expanded_prefix = prefix * int(math.ceil((len(period) / i)))
         if expanded_prefix[:len(period)] == period and period.startswith(expanded_prefix[len(period):]):
@@ -32,10 +62,32 @@ class PeriodicWord:
         self.period = period
     def __str__(self):
         return f"{self.prefix}({self.period})^ω"
+    def __repr__(self):
+        return str(self)
     def __hash__(self):
         return hash((self.prefix, self.period))
     def __eq__(self, other):
-        return self.prefix == other.prefix and self.period == other.period
+        if isinstance(other, PeriodicWord):
+            return self.prefix == other.prefix and self.period == other.period
+        return NotImplemented
+    def __radd__(self, other):
+        if isinstance(other, str):
+            return PeriodicWord(other + self.prefix, self.period)
+        return NotImplemented
+    def expand(self, n):
+        if n <= len(self.prefix):
+            return self.prefix[:n]
+        else:
+            rep_len = n - len(self.prefix)
+            full_reps = self.period * (rep_len // len(self.period))
+            partial_rep = self.period[:rep_len-len(full_reps)]
+            return self.prefix + full_reps + partial_rep
+    def startswith(self, prefix):
+        if isinstance(prefix, str):
+            return self.expand(len(prefix)) == prefix
+        elif isinstance(prefix, PeriodicWord):
+            return prefix == self
+        return NotImplemented
 
 if __name__ == "__main__":
     assert rrotate("abc", 0) == "abc"
@@ -70,5 +122,29 @@ if __name__ == "__main__":
     assert PeriodicWord("abc", "abcabc") == PeriodicWord("", "abc")
     assert PeriodicWord("abcabc", "abcabc") == PeriodicWord("", "abc")
     assert PeriodicWord("abcab", "cabcab") == PeriodicWord("", "abc")
+    assert PeriodicWord("a", "aaaa") == PeriodicWord("", "a")
     assert hash(PeriodicWord("abcab", "cabcab")) == hash(PeriodicWord("", "abc"))
     assert hash(PeriodicWord("abcab", "cabca")) != hash(PeriodicWord("", "abc"))
+
+    assert PeriodicWord("ab", "ab").startswith("")
+    assert PeriodicWord("ab", "ab").startswith("ab")
+    assert PeriodicWord("ab", "ab").startswith("a")
+    assert PeriodicWord("ab", "ab").startswith("abab")
+    assert PeriodicWord("ca", "ab").startswith("ca")
+    assert PeriodicWord("ca", "ab").startswith("caab")
+    assert PeriodicWord("ca", "ab").startswith("caa")
+    assert PeriodicWord("ca", "ab").startswith("caaba")
+    assert PeriodicWord("cc", "a").startswith("cc")
+    assert not PeriodicWord("cc", "a").startswith("ca")
+    assert not PeriodicWord("cc", "a").startswith("a")
+    assert not PeriodicWord("cc", "a").startswith("ccb")
+
+    assert longest_common_prefix(("a", "b")) == ""
+    assert longest_common_prefix(("a", "a")) == "a"
+    assert longest_common_prefix(("a", "a", "b")) == ""
+    assert longest_common_prefix(("aab", "a", "a")) == "a"
+    assert longest_common_prefix(("a", "aab")) == "a"
+    assert longest_common_prefix(("aa", "aab")) == "aa"
+    assert longest_common_prefix(("aa", PeriodicWord("", "a"))) == "aa"
+    assert longest_common_prefix((PeriodicWord("aab", "a"), PeriodicWord("", "a"))) == "aa"
+    assert longest_common_prefix((PeriodicWord("aa", "a"), PeriodicWord("", "a"))) == PeriodicWord("a", "aaaa")
