@@ -4,15 +4,22 @@ import networkx as nx
 from collections import deque
 from networkx.drawing.nx_agraph import to_agraph
 
+EPSILON = "ɛ"
+
 def trans_create_labels(T):
     for _,_,attr in T.edges(data=True):
         inp = attr["input"]
         out = attr["output"]
         if inp == "":
-            inp = "ɛ"
+            inp = EPSILON
         if out == "":
-            out = "ɛ"
+            out = EPSILON
         attr["label"] = f"{inp}|{out}"
+    for node, attr in T.nodes(data=True):
+        if isinstance(node, tuple) and len(node) == 2:
+            p, P = node
+            P_str = ", ".join(f"({q},{z if z else EPSILON})" for q, z in P)
+            attr["label"] = f"{p} | {P_str}"
 
 def compute_R(P, a, T, S):
     s = set()
