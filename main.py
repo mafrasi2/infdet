@@ -1,10 +1,8 @@
-from util import PeriodicWord, longest_common_prefix
+from util import PeriodicWord, longest_common_prefix, EPSILON
 
 import networkx as nx
 from collections import deque
 from networkx.drawing.nx_agraph import to_agraph
-
-EPSILON = "ɛ"
 
 def trans_create_labels(T):
     for _,_,attr in T.edges(data=True):
@@ -14,12 +12,12 @@ def trans_create_labels(T):
             inp = EPSILON
         if out == "":
             out = EPSILON
-        attr["label"] = f"{inp}|{out}"
+        attr["texlbl"] = f"${inp},{out}$"
     for node, attr in T.nodes(data=True):
         if isinstance(node, tuple) and len(node) == 2:
             p, P = node
             P_str = ", ".join(f"({q},{z if z else EPSILON})" for q, z in P)
-            attr["label"] = f"{p} | {P_str}"
+            attr["texlbl"] = f"${p} , {P_str}$"
 
 def compute_R(P, a, T, S):
     s = set()
@@ -109,5 +107,6 @@ D = determinize(T, A, {1: PeriodicWord("", "a")}, input_alphabet)
 
 trans_create_labels(D)
 a = to_agraph(D)
-a.layout("dot")
-a.draw("T.pdf", format="pdf")
+a.write("G.dot")
+#a.layout("dot")
+#a.draw("G.pdf", format="pdf")

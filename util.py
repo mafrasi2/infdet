@@ -1,5 +1,10 @@
 import math
 
+#EPSILON = "ɛ"
+#OMEGA = "ω"
+EPSILON = "{\\epsilon}"
+OMEGA = "{\\omega}"
+
 def longest_common_prefix(words):
     some_str = None
     some_peri_word = None
@@ -61,7 +66,7 @@ class PeriodicWord:
         self.prefix = prefix
         self.period = period
     def __str__(self):
-        return f"{self.prefix}({self.period})^ω"
+        return f"{self.prefix}({self.period})^{OMEGA}"
     def __repr__(self):
         return str(self)
     def __hash__(self):

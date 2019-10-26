@@ -1,3 +1,7 @@
 *.pdf
 *.png
+*.aux
+*.tex
+*.log
+*.dot
 .venv/
