@@ -1,0 +1,1 @@
+This projects implements the determinization algorithm for transducers over infinite words introduced in by [Béal and Carton in Theoretical Computer Science, volume 289, 2002](https://www.sciencedirect.com/science/article/pii/S0304397501002717).
