@@ -88,6 +88,13 @@ class PeriodicWord:
         elif isinstance(prefix, PeriodicWord):
             return prefix == self
         return NotImplemented
+    def without_prefix(self, n):
+        if n <= len(self.prefix):
+            return PeriodicWord(self.prefix[n:], self.period)
+        else:
+            n -= len(self.prefix)
+            new_period = rrotate(self.period, n)
+            return PeriodicWord("", new_period)
 
 if __name__ == "__main__":
     assert rrotate("abc", 0) == "abc"
@@ -148,3 +155,6 @@ if __name__ == "__main__":
     assert longest_common_prefix(("aa", PeriodicWord("", "a"))) == "aa"
     assert longest_common_prefix((PeriodicWord("aab", "a"), PeriodicWord("", "a"))) == "aa"
     assert longest_common_prefix((PeriodicWord("aa", "a"), PeriodicWord("", "a"))) == PeriodicWord("a", "aaaa")
+
+    assert PeriodicWord("", "a").without_prefix(1) == PeriodicWord("", "a")
+    assert PeriodicWord("ab", "a").without_prefix(2) == PeriodicWord("", "a")
