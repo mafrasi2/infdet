@@ -49,6 +49,7 @@ def determinize(T, A, S, input_alphabet):
         (i, S[i]) if i in S else (i, "") for i in T.graph["init"]
     ))
     D.add_node(init_state)
+    D.graph["init"] = {init_state}
 
     todo = deque([(init_state, a) for a in input_alphabet])
     while todo:
