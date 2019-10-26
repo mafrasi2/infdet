@@ -4,17 +4,6 @@ def rrotate(s, n):
     n = n % len(s)
     return s[-n:] + s[:-n]
 
-def repeat_to_match_len(s, l):
-    assert len(s) > 0
-    r = ""
-    i = 0
-    while len(r) < l:
-        r += s[i]
-        i += 1
-        if i == len(s):
-            i = 0
-    return r
-
 def minimize_period(period):
     # very inefficient, but I don't care
     for i in range(2, len(period)):
