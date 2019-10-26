@@ -1,3 +1,5 @@
+import math
+
 def rrotate(s, n):
     n = n % len(s)
     return s[-n:] + s[:-n]
@@ -14,11 +16,11 @@ def repeat_to_match_len(s, l):
     return r
 
 def minimize_period(period):
-    print(period)
     # very inefficient, but I don't care
     for i in range(2, len(period)):
         prefix = period[:i]
-        if repeat_to_match_len(prefix, len(period)) == period:
+        expanded_prefix = prefix * int(math.ceil((len(period) / i)))
+        if expanded_prefix[:len(period)] == period and period.startswith(expanded_prefix[len(period):]):
             return prefix
     return period
 
@@ -34,13 +36,17 @@ def minimize_prefix(prefix, period):
 
 class PeriodicWord:
     def __init__(self, prefix, period):
+        assert len(period) > 0
         period = minimize_period(period)
         prefix, period = minimize_prefix(prefix, period)
         self.prefix = prefix
         self.period = period
     def __str__(self):
-        return "{self.prefix}({self.period})^ω"
-
+        return f"{self.prefix}({self.period})^ω"
+    def __hash__(self):
+        return hash((self.prefix, self.period))
+    def __eq__(self, other):
+        return self.prefix == other.prefix and self.period == other.period
 
 if __name__ == "__main__":
     assert rrotate("abc", 0) == "abc"
@@ -71,3 +77,9 @@ if __name__ == "__main__":
     assert r.prefix == "" and r.period == "ab"
     r = PeriodicWord("abc", "abcabc")
     assert r.prefix == "" and r.period == "abc"
+
+    assert PeriodicWord("abc", "abcabc") == PeriodicWord("", "abc")
+    assert PeriodicWord("abcabc", "abcabc") == PeriodicWord("", "abc")
+    assert PeriodicWord("abcab", "cabcab") == PeriodicWord("", "abc")
+    assert hash(PeriodicWord("abcab", "cabcab")) == hash(PeriodicWord("", "abc"))
+    assert hash(PeriodicWord("abcab", "cabca")) != hash(PeriodicWord("", "abc"))
