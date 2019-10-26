@@ -93,7 +93,7 @@ class PeriodicWord:
             return PeriodicWord(self.prefix[n:], self.period)
         else:
             n -= len(self.prefix)
-            new_period = rrotate(self.period, n)
+            new_period = rrotate(self.period, -n)
             return PeriodicWord("", new_period)
 
 if __name__ == "__main__":
@@ -158,3 +158,7 @@ if __name__ == "__main__":
 
     assert PeriodicWord("", "a").without_prefix(1) == PeriodicWord("", "a")
     assert PeriodicWord("ab", "a").without_prefix(2) == PeriodicWord("", "a")
+    assert PeriodicWord("", "abc").without_prefix(2) == PeriodicWord("", "cab")
+    assert PeriodicWord("", "abcd").without_prefix(2) == PeriodicWord("", "cdab")
+    assert PeriodicWord("", "abcd").without_prefix(3) == PeriodicWord("", "dabc")
+    assert PeriodicWord("", "abcd").without_prefix(8) == PeriodicWord("", "abcd")
