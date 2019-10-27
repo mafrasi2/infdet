@@ -15,7 +15,7 @@ def longest_common_prefix(words):
             some_peri_word = w
         if some_str is not None and some_peri_word is not None:
             break
-    if some_str:
+    if some_str is not None:
         for i in range(len(some_str), -1 , -1):
             prefix = some_str[:i]
             if all(map(lambda s: s.startswith(prefix), words)):
