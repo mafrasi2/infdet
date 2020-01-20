@@ -52,6 +52,9 @@ def gen_trans(rand, input_alphabet, output_alphabet):
     final = rand.sample(range(num_nodes), num_final)
     T = nx.MultiDiGraph(init={0},final={f: "" for f in final})
     T.add_nodes_from(list(range(num_nodes)))
+
+    used_inputs = set()
+    used_outputs = set()
     for src in range(num_nodes):
         for a in input_alphabet:
             num_edges = rand.randrange(0, 3)
@@ -61,7 +64,13 @@ def gen_trans(rand, input_alphabet, output_alphabet):
                     continue
                 out_len = rand.randrange(0, 3)
                 out = "".join(rand.choices(output_alphabet, k=out_len))
+                used_inputs.update(a)
+                used_outputs.update(out)
                 T.add_edge(src, dest, input=a, output=out)
+    if len(used_inputs) <= 1:
+        raise Reject("not enough inputs used")
+    if len(used_outputs) <= 1:
+        raise Reject("not enough outputs used")
     return T
 
 class Reject(Exception):
@@ -125,7 +134,7 @@ def determinize(T, input_alphabet):
     return D
 
 input_alphabet = "ab"
-output_alphabet = "a"
+output_alphabet = "ab"
 T = nx.MultiDiGraph(init={0},final={4:"",5:""})
 T.add_nodes_from([0,1,2,3,4,5])
 T.add_edges_from([
@@ -141,6 +150,7 @@ T.add_edges_from([
 ])
 
 rnd = random.Random()
+errs = {}
 while True:
     try:
         T = gen_trans(rnd, input_alphabet, output_alphabet)
@@ -148,8 +158,14 @@ while True:
         render(T, "T.pdf")
         render(D, "D.pdf")
     except Reject as e:
-        print(f"Rejection reason: {str(e)}")
+        msg = str(e)
+        if not msg in errs:
+            errs[msg] = 0
+        errs[msg] += 1
         continue
+    print("Rejection reasons:")
+    for msg, num in errs.items():
+        print(f"  {msg}: {num}")
     input("Press ENTER for the next one...")
 #a.layout("dot")
 #a.draw("G.pdf", format="pdf")
