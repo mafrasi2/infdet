@@ -3,6 +3,7 @@ from util import PeriodicWord, longest_common_prefix, EPSILON
 import networkx as nx
 import subprocess as sp
 import random
+import sys
 from collections import deque
 from networkx.drawing.nx_agraph import to_agraph
 from pprint import pprint
@@ -84,6 +85,10 @@ def determinize(T, input_alphabet):
     D.add_node(init_state)
     D.graph["init"] = {init_state}
     D.graph["final"] = {}
+    for i in T.graph["init"]:
+        if i in T.graph["final"]:
+            D.graph["final"][init_state] = ""
+            break
     todo = deque([(init_state, a) for a in input_alphabet])
     num_steps = 0
     MAX_STEPS = 20
@@ -149,23 +154,40 @@ T.add_edges_from([
     (5, 5, {"input": "a", "output": "a"}),
 ])
 
-rnd = random.Random()
-errs = {}
-while True:
+def loop_generator():
+    glob_rnd = random.Random()
+    errs = {}
+    while True:
+        seed = glob_rnd.randrange(0, 2**64)
+        rnd = random.Random(seed)
+        try:
+            T = gen_trans(rnd, input_alphabet, output_alphabet)
+            D = determinize(T, input_alphabet)
+            render(T, "T.pdf")
+            render(D, "D.pdf")
+        except Reject as e:
+            msg = str(e)
+            if not msg in errs:
+                errs[msg] = 0
+            errs[msg] += 1
+            continue
+        print("Rejection reasons:")
+        for msg, num in errs.items():
+            print(f"  {msg}: {num}")
+        print(f"Seed: 0x{seed:016x}")
+        input("Press ENTER for the next one...")
+
+if len(sys.argv) > 1:
+    seed = int(sys.argv[1], 0)
+    rnd = random.Random(seed)
     try:
         T = gen_trans(rnd, input_alphabet, output_alphabet)
         D = determinize(T, input_alphabet)
         render(T, "T.pdf")
         render(D, "D.pdf")
     except Reject as e:
-        msg = str(e)
-        if not msg in errs:
-            errs[msg] = 0
-        errs[msg] += 1
-        continue
-    print("Rejection reasons:")
-    for msg, num in errs.items():
-        print(f"  {msg}: {num}")
-    input("Press ENTER for the next one...")
+        print(f"Rejection reason: {e}")
+else:
+    loop_generator()
 #a.layout("dot")
 #a.draw("G.pdf", format="pdf")
